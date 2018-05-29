@@ -91,112 +91,7 @@
       _instance.action.show = !_instance.action.autoHide;
     }
 
-    var _botuiComponent = {
-      template: 'BOTUI_TEMPLATE', // replaced by HTML template during build. see Gulpfile.js
-      data: function () {
-        return {
-          action: {
-            text: {
-              size: 30,
-              placeholder: 'Write here ..'
-            },
-            button: {},
-            show: false,
-            type: 'text',
-            autoHide: true,
-            addMessage: true
-          },
-          messages: []
-        };
-      },
-      computed: {
-        isMobile: function () {
-          return root.innerWidth && root.innerWidth <= 768;
-        }
-      },
-    	methods: {
-    		handle_action_button: function (button) {
-          _handleAction(button.text);
-          var defaultActionObj = {
-            type: 'button',
-            text: button.text,
-            value: button.value
-          };
-
-          for (var eachProperty in button) {
-            if (button.hasOwnProperty(eachProperty)) {
-              if (eachProperty !== 'type' && eachProperty !== 'text' && eachProperty !== 'value') {
-                defaultActionObj[eachProperty] = button[eachProperty];
-              }
-            }
-          }
-
-          _actionResolve(defaultActionObj);
-    		},
-    		handle_action_text: function () {
-    			if(!this.action.text.value) return;
-          _handleAction(this.action.text.value);
-    			_actionResolve({
-            type: 'text',
-            value: this.action.text.value
-          });
-    			this.action.text.value = '';
-    		},
-        handle_action_select: function () {
-          if(this.action.select.searchselect && !this.action.select.multipleselect) {
-            if(!this.action.select.value.value) return; 
-            _handleAction(this.action.select.value[this.action.select.label]);
-            _actionResolve({
-              type: 'text',
-              value: this.action.select.value.value,
-              text: this.action.select.value.text,
-              obj: this.action.select.value
-            });
-          } 
-          if(this.action.select.searchselect && this.action.select.multipleselect) {
-            if(!this.action.select.value) return; 
-            var values = new Array();
-            var labels = new Array();
-            for (var i = 0; i < this.action.select.value.length; i++) {
-              values.push(this.action.select.value[i].value);
-              labels.push(this.action.select.value[i][this.action.select.label]);
-            }
-            _handleAction(labels.join(', '));
-            _actionResolve({
-              type: 'text',
-              value: values.join(', '),
-              text: labels.join(', '),
-              obj: this.action.select.value
-            });
-          }
-          else {
-            if(!this.action.select.value) return; 
-            for (var i = 0; i < this.action.select.options.length; i++) { // Find select title
-              if (this.action.select.options[i].value == this.action.select.value) {
-                _handleAction(this.action.select.options[i].text);
-                _actionResolve({
-                  type: 'text',
-                  value: this.action.select.value,
-                  text: this.action.select.options[i].text
-                });
-              }
-            }
-          }
-        }
-    	}
-    };
-
-    root.Vue.directive('botui-markdown', function (el, binding) {
-      if(binding.value == 'false') return; // v-botui-markdown="false"
-      el.innerHTML = _parseMarkDown(el.textContent);
-    });
-
-    root.Vue.directive('botui-scroll', {
-      inserted: function (el) {
-        _container.scrollTop = _container.scrollHeight;
-      }
-    });
-
+   
     root.Vue.directive('focus', {
       inserted: function (el) {
         el.focus();
@@ -250,47 +145,7 @@
       return _opts || {};
     }
 
-    _interface.message =  {
-      add: function (addOpts) {
-        return _addMessage( _checkOpts(addOpts) );
-      },
-      bot: function (addOpts) {
-        addOpts = _checkOpts(addOpts);
-        return _addMessage(addOpts);
-      },
-      human: function (addOpts) {
-        addOpts = _checkOpts(addOpts);
-        addOpts.human = true;
-        return _addMessage(addOpts);
-      },
-      get: function (index) {
-        return Promise.resolve(_instance.messages[index]);
-      },
-      remove: function (index) {
-        _instance.messages.splice(index, 1);
-        return Promise.resolve();
-      },
-      update: function (index, msg) { // only content can be updated, not the message type.
-        var _msg = _instance.messages[index];
-        _msg.content = msg.content;
-        _msg.visible = !msg.loading;
-        _msg.loading = !!msg.loading;
-        return Promise.resolve(msg.content);
-      },
-      removeAll: function () {
-        _instance.messages.splice(0, _instance.messages.length);
-        return Promise.resolve();
-      }
-    };
-
-    function mergeAtoB(objA, objB) {
-      for (var prop in objA) {
-        if (!objB.hasOwnProperty(prop)) {
-          objB[prop] = objA[prop];
-        }
-      }
-    }
-
+ 
     function _checkAction(_opts) {
       if(!_opts.action && !_opts.actionButton  && !_opts.actionText) {
         throw Error('BotUI: "action" property is required.');
@@ -379,19 +234,7 @@
       }      
     };
 
-    if(_options.fontawesome) {
-      loadScript(_fontAwesome);
-    }
-
-    if(_options.searchselect) {
-      loadScript(_searchselect, function() {
-        Vue.component('v-select', VueSelect.VueSelect);      
-      });
-    }
-
-    if(_options.debug) {
-      _interface._botApp = _botApp; // current Vue instance
-    }
+   
 
     return _interface;
   });
